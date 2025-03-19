@@ -1,5 +1,5 @@
 AMREX_HOME ?= ../../../amrex
-PELE_PHYSICS_HOME ?= ../../../PelePhysics
+PELE_PHYSICS_HOME ?= ../../PelePhysics
 
 # AMReX
 DEBUG	      = FALSE
@@ -9,6 +9,7 @@ PRECISION     = DOUBLE
 # Compilation
 COMP          = gnu
 USE_MPI       = TRUE
+USE_MPI       = FALSE
 USE_OMP       = FALSE
 USE_CUDA      = FALSE
 
@@ -16,8 +17,8 @@ USE_CUDA      = FALSE
 # Uncomment the desired exec
 #EBASE         = grad
 #EBASE         = combinePlts
-#EBASE         = isosurface
-EBASE         = flattenAMRFile
+EBASE         = isosurface
+#EBASE         = flattenAMRFile
 #EBASE         = stream
 #EBASE         = partStream
 #EBASE         = blowOut
@@ -44,7 +45,7 @@ NEEDS_f90_SRC = FALSE
 Pdirs   := Base Boundary AmrCore Extern/amrdata LinearSolvers/MLMG
 Ppack   += $(foreach dir, $(Pdirs), $(AMREX_HOME)/Src/$(dir)/Make.package)
 
-PPdirs  := Utility/PltFileManager
+PPdirs  := Source/Utility/PltFileManager
 Ppack   += $(foreach dir, $(PPdirs), $(PELE_PHYSICS_HOME)/$(dir)/Make.package)
 
 ifeq ($(EBASE),partStream)
@@ -54,14 +55,17 @@ ifeq ($(EBASE),partStream)
   CEXE_sources += StreamData.cpp  StreamPC.cpp
 endif
 
-include $(AMREX_HOME)/Tools/GNUMake/Make.defs
-
 CEXE_sources += $(EBASE).cpp
 ifeq ($(NEEDS_f90_SRC),TRUE)
   f90EXE_sources += $(EBASE)_nd.f90
+  BL_NO_FORT = FALSE
+else
+  BL_NO_FORT = TRUE
 endif
 INCLUDE_LOCATIONS += .
 VPATH_LOCATIONS   += .
+
+include $(AMREX_HOME)/Tools/GNUMake/Make.defs
 
 include $(Ppack)
 INCLUDE_LOCATIONS += $(Blocs)
